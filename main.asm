@@ -51,7 +51,7 @@ includelib \masm32\lib\masm32.lib
     textoNome4 db "Insira a intensidade: ", 0
 
 .code
-    funcao:
+    funcao proc stdcall
         ;+8 = intensidade
         ;+12 = cor
         ;+16 = array?
@@ -83,6 +83,7 @@ includelib \masm32\lib\masm32.lib
         fimRet:
             pop ebp
             ret   0
+    funcao endp
 
     start:
         ;definição de destino e origem dos arquivos:
@@ -201,26 +202,25 @@ includelib \masm32\lib\masm32.lib
         ler:
             invoke ReadFile, fileHandle, addr fileBuffer3bytes, 3, addr readCount, NULL
             
-            ;movendo os parametos das funções para registradores
-            mov ebx, offset fileBuffer3bytes
-            mov eax, cor
+            ; movendo os parametos das funções para registradores
             mov ecx, intensidade
-
-            ;colocando os registradores com os parametros na pilha
+            mov edx, cor
+            mov ebx, offset fileBuffer3bytes
+            
+            ; colocando os registradores com os parametros na pilha (na ordem inversa)
             push ebx
-            push eax
+            push edx
             push ecx
-
-            ;fazendo a chamada da função
+            
+            ; fazendo a chamada da função
             call funcao
-
-            ;limpeza do da pilha
-            pop ebx
-            pop eax
-            pop ecx
-
+            
+            ; limpeza do da pilha
+            add esp, 12
+            
             cmp readCount, 0
         je fim
+
 
         repete:
             invoke WriteFile, writeHandle, addr fileBuffer3bytes, 3, addr writeCount, NULL ; escreve no novo arquivo
